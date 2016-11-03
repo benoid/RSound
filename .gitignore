@@ -1,4 +1,14 @@
 doc
+
+composer-doc/*.css
+composer-doc/*.js
+composer-doc/*.html
+composer-doc/*.tex
+composer-doc/*.log
+composer-doc/*.out
+composer-doc/*.pdf
+composer-doc/*.aux
+
 planet-docs
 compiled
 *~
