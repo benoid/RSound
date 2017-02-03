@@ -1,0 +1,31 @@
+Feature Wishlist
+
+Easy
+-double sharps/flats
+-pickup measure
+-make key-signature a keyword in <#procedure:section>
+ instead of a label-function
+-more argchecks
+  - argchecks for play and pstream-queue functions
+  - argchecks for subdivision
+  - argchecks for all play and pstream-queue functions
+  - guard for beat-value
+-merge instrument-proc-safety-wrapper directly into instrument constructor
+  - remove make-instrument extra constructor
+-make a module
+-find more things to test
+-scribble doc
+-wav exporting
+
+Medium
+-note duration ties
+-tonal transposition
+
+Probably Difficult
+- create instruments from soundfonts (sf2, sfz)
+- import/export .ly
+- import/export .mid
+- import/export music/xml
+ 
+Probably big enough to warrant a separate project
+- Graphical notation editor
