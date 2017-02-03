@@ -1,5 +1,10 @@
 doc
 
+# I sometimes type "]" as a second command line argument to vi by mistake.
+# The following filename is being ignored because a file 
+# named "]" has slipped into the master branch more than once...
+]
+
 composer-doc/*.css
 composer-doc/*.js
 composer-doc/*.html
@@ -8,6 +13,8 @@ composer-doc/*.log
 composer-doc/*.out
 composer-doc/*.pdf
 composer-doc/*.aux
+
+*.swp
 
 planet-docs
 compiled
