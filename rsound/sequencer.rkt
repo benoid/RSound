@@ -19,7 +19,8 @@
  [queue-for-playing! (-> heap? rsound? nonnegative-integer? void?)]
  [queue-for-callbacking! (-> heap? (-> any) nonnegative-integer? void?)]
  [heap->signal/block/unsafe
-  (-> heap? heap? (values procedure? procedure? box?))])
+  (-> heap? heap? (values procedure? procedure? box?))]
+ [clear-all-sounds! (-> heap? void?)])
 
 
 ;; with occasional #f's sneaking into the heap, it looks like I need to
@@ -147,6 +148,24 @@
                      (heap-remove-min! playing-heap)))
                   (loop #t)]
                  [else removed?])])))
+
+;; given a heap (ordered by ending time) and a current time, remove
+;; all sounds
+(define (clear-all-sounds! playing-heap)
+  (let loop ([removed? #f])
+    (cond [(= (heap-count playing-heap) 0) (void)]
+          [else
+           ;(define earliest-ending (heap-min playing-heap))
+           ;(cond [(<= (entry-finish earliest-ending) current-time) 
+                  (call-with-semaphore
+                   heap-sema
+                   (lambda ()
+                     (heap-remove-min! playing-heap)))
+                  (loop #t)
+                  (void)
+                  ] )))
+
+            ;     [else removed?])])))
 
 ;; given a callback heap and a current time, post to all the
 ;; semaphores whose trigger time precedes the current time
