@@ -1,0 +1,4 @@
+# I sometimes type "]" as a second command line argument to vi by mistake.
+# The following filename is being ignored because a file 
+# named "]" has slipped into the master branch more than once...
+]
