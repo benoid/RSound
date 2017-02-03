@@ -18,7 +18,7 @@
          pstream-queue-callback
          pstream-volume
          pstream-set-volume!
-         pstream-stop)
+         pstream-clear)
 
 ;; a pstream bundles a sound-heap that's attached
 ;; to a playing stream and a time-checker that returns
@@ -43,7 +43,10 @@
     (raise-argument-error 'pstream-current-frame "pstream" 0 pstream))
   ((pstream-time-checker pstream)))
 
-(define (pstream-stop pstream)
+;; Clear all queued rsounds in a pstream.  
+;; This does not stop rsounds which are currently
+;; being played.
+(define (pstream-clear pstream)
   (clear-all-sounds! (pstream-sound-heap pstream)))
 
 ;; queue 'snd' for playing on 'pstream' at 'frame'
