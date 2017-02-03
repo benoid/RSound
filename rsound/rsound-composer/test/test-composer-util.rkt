@@ -44,16 +44,16 @@
 
     (test-case
       "letter-and-octave-to-midi works as expected"
-      (let ([letters (list 'A 'B 'C 'D 'E 'F 'G)]
-            [oct (list  0  1  2  3  3  4  4)]
-            [mid (list 21  35  36 50 52 65 67)])
+      (let ([letters (list 'A 'B 'C 'Cb 'D 'D##'E 'F 'G)]
+            [oct     (list  0  1  2  2   3  3   3  4  4)]
+            [mid     (list 21  35 36 35 50  52  52 65 67)])
         (check = (length mid) (length oct))
         (check = (length mid) (length letters))
         (for ([o oct]
               [m mid]
               [l letters])
           (check-equal? (letter-and-octave-to-midi l o) m  
-                        "could not convert letter and octave to midi number"))))
+                        (string-append "could not convert letter and octave to midi number: " (symbol->string l))))))
 
     (test-case
       "midi-note-num-to-freq"
