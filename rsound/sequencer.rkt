@@ -149,7 +149,7 @@
                   (loop #t)]
                  [else removed?])])))
 
-;; given a heap (ordered by ending time) and a current time, remove
+;; given a heap (ordered by ending time), remove
 ;; all sounds
 (define (clear-all-sounds! playing-heap)
   (let loop ([removed? #f])
