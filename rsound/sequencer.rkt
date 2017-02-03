@@ -155,8 +155,6 @@
   (let loop ([removed? #f])
     (cond [(= (heap-count playing-heap) 0) (void)]
           [else
-           ;(define earliest-ending (heap-min playing-heap))
-           ;(cond [(<= (entry-finish earliest-ending) current-time) 
                   (call-with-semaphore
                    heap-sema
                    (lambda ()
@@ -164,8 +162,6 @@
                   (loop #t)
                   (void)
                   ] )))
-
-            ;     [else removed?])])))
 
 ;; given a callback heap and a current time, post to all the
 ;; semaphores whose trigger time precedes the current time
