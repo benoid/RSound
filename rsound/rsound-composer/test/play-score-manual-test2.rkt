@@ -8,7 +8,7 @@
       #:assert-time-sig #t
       (key-signature "") 
       #:tempo 180
-      (instrument-part
+      (instrument-line
         [vgame-synth-instrument 4]
         (measure
           (eighth-note 'G  3)
@@ -82,7 +82,7 @@
           (eighth-note 'D  4)
           (eighth-note 'Bb 3)
           (eighth-note 'D  4)))
-      (instrument-part
+      (instrument-line
         [vgame-synth-instrument 4]
         (measure
           (eighth-note 'D  5)
