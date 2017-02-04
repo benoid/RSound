@@ -4,10 +4,10 @@
          "../single-cycle.rkt"
          "note.rkt"
          "beat-value.rkt"
-         "harmony.rkt"
-         "define-argcheck.rkt")
+         "harmony.rkt")
 
-(provide (all-defined-out))
+(provide (except-out (all-defined-out)
+                     conversion-proc-safety-wrapper))
 
 
 ;; Needs test
@@ -15,13 +15,13 @@
   #:guard (lambda (name proc t)
             (if (and (string? name)
                      (procedure? proc))
-                (values name proc)
+                (values name (conversion-proc-safety-wrapper proc))
                 (error "expected args of type: <#string> <#procedure>"))))
 
 
 ;; Needs test
-(define/argcheck (conversion-proc-safety-wrapper 
-                   [conversion-proc procedure? "procedure"])
+(define/contract (conversion-proc-safety-wrapper conversion-proc)
+  (-> procedure? procedure?)
   (lambda (n tempo)
     (cond ((rest? n) (silence (beat-value-frames 
                                 ((note-duration n) tempo))))
@@ -33,13 +33,9 @@
          (else 
            (conversion-proc n tempo)))))
 
-(define (create-instrument name conversion-proc)
-  (instrument name (conversion-proc-safety-wrapper conversion-proc)))
-
-
 ;; Needs test
 (define (vgame-synth-instrument spec)
-  (create-instrument 
+  (instrument 
     (string-append "vgame synth: " (number->string spec))
     (lambda (n tempo)
       (synth-note "vgame" 
@@ -49,7 +45,7 @@
 
 ;; Needs test
 (define (main-synth-instrument spec)
-  (create-instrument 
+  (instrument 
     (string-append "main synth: " (number->string spec))
     (lambda (n tempo)
       (synth-note "main" 
@@ -59,7 +55,7 @@
 
 ;; Needs test
 (define (path-synth-instrument spec)
-  (create-instrument 
+  (instrument 
     (string-append "path synth: " (number->string spec))
     (lambda (n tempo)
       (synth-note "path" 

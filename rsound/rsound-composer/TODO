@@ -1,17 +1,10 @@
 Feature Wishlist
 
 Easy
--double sharps/flats
 -pickup measure
 -make key-signature a keyword in <#procedure:section>
  instead of a label-function
--more argchecks
-  - argchecks for play and pstream-queue functions
-  - argchecks for subdivision
-  - argchecks for all play and pstream-queue functions
-  - guard for beat-value
--merge instrument-proc-safety-wrapper directly into instrument constructor
-  - remove make-instrument extra constructor
+- contracts for composer-rsound procedures
 -make a module
 -find more things to test
 -scribble doc

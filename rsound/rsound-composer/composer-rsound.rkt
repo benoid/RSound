@@ -7,7 +7,8 @@
          "beat-value.rkt"
          "score.rkt")
 
-(provide (all-defined-out))
+(provide (except-out (all-defined-out)
+                     sleep-while))
 
 (define default-pstream
   (make-pstream))
