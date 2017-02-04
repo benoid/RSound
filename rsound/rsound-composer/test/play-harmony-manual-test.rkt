@@ -8,7 +8,7 @@
       #:assert-time-sig #t
       (key-signature "") 
       #:tempo 180
-      (instrument-part
+      (instrument-line
         [vgame-synth-instrument 4]
         (measure
           (harmony

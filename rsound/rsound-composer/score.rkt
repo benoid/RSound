@@ -24,23 +24,23 @@
 (define (key-signature k) k)
 
 ; Score
-(struct struct-score [section-list])
-(define score? struct-score?)
-(define score-section-list struct-score-section-list)
+(struct score-struct [section-list])
+(define score? score-struct?)
+(define score-section-list score-struct-section-list)
 (define (score . sections)
-  (struct-score sections))
+  (score-struct sections))
 
 ; Section
-(struct struct-section 
-  [time-sig key-sig tempo instrument-part-list]
+(struct section-struct 
+  [time-sig key-sig tempo instrument-line-list]
   #:guard
-    (lambda (time-sig key-sig tempo instr-part-list name)
+    (lambda (time-sig key-sig tempo instr-line-list name)
       (if (and (time-signature? time-sig)
                ;; No check for key signature type is intended
                (exact-positive-integer? tempo)
-               (list? instr-part-list))
-          (values time-sig key-sig tempo instr-part-list)
-          (error "<#procedure:struct-section> invalid arguments"))))
+               (list? instr-line-list))
+          (values time-sig key-sig tempo instr-line-list)
+          (error "<#procedure:section-struct> invalid arguments"))))
 
 ;; Write test for guard
 ;; Make key-sig a keyword
@@ -48,26 +48,26 @@
                  #:assert-time-sig [assert-time-sig? #t] 
                  key-sig 
                  #:tempo [tempo 120]
-                 . instrument-parts)
+                 . instrument-lines)
   (let ([new-section 
-          (struct-section time-sig key-sig tempo instrument-parts)])
+          (section-struct time-sig key-sig tempo instrument-lines)])
       (if (and assert-time-sig? 
                (not 
                  (andmap 
                    (lambda (ip)
-                     (instr-part-is-valid? ip time-sig)) 
-                   instrument-parts)))
+                     (instr-line-is-valid? ip time-sig)) 
+                   instrument-lines)))
         (let* ([invalid-measure-index-list
                 (map
                   (lambda (ip)
                     (find-invalid-measure-indices ip time-sig))
-                  instrument-parts)]
+                  instrument-lines)]
                [error-list
                  (filter
                    string?
-                   (for/list ([instr-part instrument-parts]
+                   (for/list ([instr-line instrument-lines]
                        [indices invalid-measure-index-list]
-                       [i (in-range 0 (length instrument-parts))])
+                       [i (in-range 0 (length instrument-lines))])
                      (if (null? indices) 
                        0
                        (string-append
@@ -88,50 +88,50 @@
     new-section)))
 
 
-(define section-time-sig struct-section-time-sig)
-(define section-key-sig struct-section-key-sig)
-(define section-tempo struct-section-tempo)
-(define section-instr-part-list struct-section-instrument-part-list)
+(define section-time-sig section-struct-time-sig)
+(define section-key-sig section-struct-key-sig)
+(define section-tempo section-struct-tempo)
+(define section-instr-line-list section-struct-instrument-line-list)
 
 (define (section-frames sect)
   (foldl 
     (lambda (len id)
       (max len id))
       0
-      (map (lambda (instr-part)
-             (instr-part-frames instr-part (section-tempo sect)))
-             (section-instr-part-list sect))))
+      (map (lambda (instr-line)
+             (instr-line-frames instr-line (section-tempo sect)))
+             (section-instr-line-list sect))))
 
 ;; Instrument Part
-(struct struct-instrument-part [instrument measure-list])
-(define instrument-part? struct-instrument-part?)
-(define instr-part-instrument struct-instrument-part-instrument)
-(define instr-part-measure-list struct-instrument-part-measure-list)
-(define (instrument-part instrument . measures)
-  (struct-instrument-part instrument measures))
+(struct instrument-line-struct [instrument measure-list])
+(define instrument-line? instrument-line-struct?)
+(define instr-line-instrument instrument-line-struct-instrument)
+(define instr-line-measure-list instrument-line-struct-measure-list)
+(define (instrument-line instrument . measures)
+  (instrument-line-struct instrument measures))
 
 ;; Needs test
-(define (instr-part-is-valid? instr-part time-sig)
-  (cond ((not (instrument-part? instr-part)) 
+(define (instr-line-is-valid? instr-line time-sig)
+  (cond ((not (instrument-line? instr-line)) 
          (error 
-           "expected argument 1 to be of type: <#struct-instrument-part>"))
+           "expected argument 1 to be of type: <#instrument-line-struct>"))
         ((not (time-signature? time-sig))
          (error 
            "expected argument 2 to be of type: <#time-signature>"))
         (else 
           (andmap (lambda (m)
                     (measure-is-valid? m time-sig))
-                  (instr-part-measure-list instr-part)))))
-(define (instr-part-frames instr-part tempo)
+                  (instr-line-measure-list instr-line)))))
+(define (instr-line-frames instr-line tempo)
   (foldl (lambda (meas total)
            (if (not (measure? meas))
              0
              (+ total (measure-frames meas tempo))))
          0
-         (instr-part-measure-list instr-part)))
+         (instr-line-measure-list instr-line)))
 
-(define (find-invalid-measure-indices instr-part time-sig)
-  (let ([measure-list (instr-part-measure-list instr-part)])
+(define (find-invalid-measure-indices instr-line time-sig)
+  (let ([measure-list (instr-line-measure-list instr-line)])
     (filter 
       number?
         (for/list ([meas measure-list]
@@ -143,20 +143,20 @@
 
 
 
-(struct struct-measure [notes]
+(struct measure-struct [notes]
   #:guard (lambda (notes name)
             (if (list? notes)
               (values notes)
               (error "expected list"))))
 
-(define measure? struct-measure?)
-(define measure-notes struct-measure-notes)
+(define measure? measure-struct?)
+(define measure-notes measure-struct-notes)
 (define (measure . notes)
-  (struct-measure notes))
+  (measure-struct notes))
 
 (define (measure-is-valid? meas time-sig)
   (cond ((not (measure? meas)) 
-         (error "expected argument 1 to be of type: <#struct-measure>"))
+         (error "expected argument 1 to be of type: <#measure-struct>"))
         ((not (time-signature? time-sig))
          (error "expected argument 2 to be of type: <#time-signature>"))
         (else 

@@ -7,8 +7,8 @@
          "beat-value.rkt"
          "score.rkt")
 
-(provide (except-out (all-defined-out)
-                     sleep-while))
+(provide (all-defined-out))
+         
 
 (define default-pstream
   (make-pstream))
@@ -42,24 +42,24 @@
        (measure-notes meas)))
 
 ;; Needs test
-(define (instrument-part->rsound-list instr-part #:tempo [tempo 120])
+(define (instrument-line->rsound-list instr-line #:tempo [tempo 120])
   (append* 
     (map (lambda (m)
            (measure->rsound-list 
              m
              (instrument-conversion-proc
-               (instr-part-instrument instr-part))
+               (instr-line-instrument instr-line))
              #:tempo tempo))
-         (instr-part-measure-list instr-part))))
+         (instr-line-measure-list instr-line))))
 
 ;; Needs test
 (define (section->rsound-2dlist sect)
   (map
-    (lambda (instr-part)
-      (instrument-part->rsound-list 
-        instr-part
+    (lambda (instr-line)
+      (instrument-line->rsound-list 
+        instr-line
         #:tempo (section-tempo sect)))
-    (section-instr-part-list sect)))
+    (section-instr-line-list sect)))
 
 ;; Queues a note and returns the last frame number of the queued note
 ;; Needs test
@@ -103,8 +103,8 @@
                          #:tempo tempo))
 
 ;; Needs test
-(define (pstream-queue-instrument-part pstr
-                                       instr-part
+(define (pstream-queue-instrument-line pstr
+                                       instr-line
                                        frames
                                        #:tempo [tempo 120])
   (- (foldl (lambda (meas frms)
@@ -112,17 +112,17 @@
                      (pstream-queue-measure
                        pstr
                        meas
-                       (instr-part-instrument instr-part)
+                       (instr-line-instrument instr-line)
                        frms
                        #:tempo tempo)])
                (+ frms measure-frames)))
              frames
-             (instr-part-measure-list instr-part)) frames))
+             (instr-line-measure-list instr-line)) frames))
 
 ;; Needs test
-(define (play-instrument-part instr-part #:tempo [tempo 120])
-  (pstream-queue-instrument-part default-pstream 
-                                 instr-part 
+(define (play-instrument-line instr-line #:tempo [tempo 120])
+  (pstream-queue-instrument-line default-pstream 
+                                 instr-line 
                                  (pstream-current-frame default-pstream)
                                  #:tempo tempo))
 
@@ -134,17 +134,17 @@
   (let 
     ([thread-ids 
        (map 
-         (lambda (instr-part)
+         (lambda (instr-line)
               (thread 
                 (lambda ()
-                        (pstream-queue-instrument-part 
+                        (pstream-queue-instrument-line 
                           pstr
-                          instr-part
+                          instr-line
                           frames
                           #:tempo (section-tempo sect))
                         (kill-thread (current-thread))
                       )))
-            (section-instr-part-list sect))])
+            (section-instr-line-list sect))])
        (sleep-while
          (lambda ()
            (andmap thread-running? thread-ids))

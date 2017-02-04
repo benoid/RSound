@@ -322,7 +322,7 @@ The library provides a way to create synthesizer instruments for playing
 @racket[rsound/composer] elements.
 
 @defstruct[instrument ([name string?] [conversion-proc procedure?])]
-An instrument is a structure which contains a name and a note-to-rsound conversion 
+An @racket[instrument] is a structure which contains a name and a note-to-rsound conversion 
 @racket[procedure].  The rsound/composer scheduler uses @racket[instruments] to turn 
 @racket[notes] into @racket[rsounds] before scheduling them on a given @racket[pstream].  
 Many playback functions allow users to specify an instrument using the 
@@ -350,18 +350,68 @@ RSound/Composer provides musical containers to organize elements into larger wor
 @subsection{Measures}
 
 Measures are containers for notes.
-@defstruct[struct-measure ([struct-measure-notes list?])]
-A @racket[struct-measure] is a data type which contains a list of notes.  Since 
-having @racket[list]s strewn throughout a score muddy its legibility, a cleaner 
-constructor is provided:
 
-@defproc[(measure [note note?] ...) struct-measure?]
-Takes an arbitrary number of notes and creates a measure.
+@defstruct[measure-struct ([measure-notes list?])]
+A @racket[measure-struct] is a data type which contains a list of notes.  
+
+@racketblock[
+  (measure-struct
+    (list
+      (quarter-note 'C 5)
+      (quarter-note 'E 5)
+      (quarter-note 'G 5)
+      (quarter-note 'C 6)))]
+
+Since having @racket[list]s strewn throughout a score can distract from its musical
+expressiveness, a cleaner constructor is provided:
+
+@defproc[(measure [note note?] ...) measure-struct?]
+Takes an arbitrary number of notes and creates a @racket[struct-measure]. 
+Think of @racket[measure] as an alias to @racket[measure-struct].  This document
+tends to refer to @racket[measure-structs] as simply @racket[measures].  They both 
+denote the same data-type.
+
+@racketblock[
+  (measure
+    (quarter-note 'C 5)
+    (quarter-note 'E 5)
+    (quarter-note 'G 5)
+    (quarter-note 'C 6))]
+
+@defproc[(play-measure [measure measure?]
+                    [#:instrument instr instrument? (main-synth-instrument 7)]
+                    [#:tempo tempo exact-positive-integer? 120]) 
+                    exact-positive-integer?]
+Plays a measure.  If no @racket[#:tempo] keword is given, the default tempo is
+120 beats per minute.
+
+@racketblock[
+(define m
+  (measure
+    (quarter-note 'C 5)
+    (quarter-note 'E 5)
+    (quarter-note 'G 5)
+    (quarter-note 'C 6)))
+(play-measure m #:tempo 80) 
+]
+
+You can also specify an instrument to use.
+
+@racketblock[
+(define m
+  (measure
+    (quarter-note 'C 5)
+    (quarter-note 'E 5)
+    (quarter-note 'G 5)
+    (quarter-note 'C 6)))
+(play-measure m #:instrument (main-synth-instrument 12))
+]
+
 
 @defproc[(measure? [item any/c]) boolean?]
 Returns @racket[#t] if @racket[item] is a measure. Returns @racket[false] otherwise.
 
-@defproc[(measure-notes [measure struct-measure?]) list?]
+@defproc[(measure-notes [measure measure?]) list?]
 Returns a measure's list of notes.
 
 @defproc[(measure-is-valid? [measure measure?] 
@@ -377,20 +427,102 @@ Takes a measure and a tempo and returns the duration of the measure in frames.  
 is useful when manually queuing measures on pstreams.
 
 
-@section{Instrument Parts}
+@section{Instrument Line}
 
-@defstruct[struct-instrument-part ([instrument any/c] 
+Instrument Lines are collections of measures which are queued and played sequentially.
+They are analagous to instrument lines on a grand staff in music notation.
+
+@defstruct[instrument-line-struct ([instrument any/c] 
                                   [measure-list (listof? measure?)])]
-@defproc[(instrument-part [instrument any/c] 
-                          [m measure?] ...) 
-                          struct-instrument-part?]
-@defproc[(instrument-part? [i any/c]) boolean?]
-@defproc[(instr-part-instrument [i instrument-part?]) any/c]
-@defproc[(instr-part-measure-list [i instrument-part?]) (listof? measure?)]
+An @racket[instrument-line-struct] stores a list of measures, as well as 
+the @racket[instrument] to play them.  
 
-@defproc[(instr-part-is-valid? [i instrument-part?] 
-                               [ts time-signature?])
+@racketblock[
+(define line
+  (instrument-line-struct
+    (main-synth-instrument 34)
+    (list
+      (measure
+        (quarter-note 'C  4)
+        (quarter-note 'D  4)
+        (quarter-note 'Eb 4)
+        (quarter-note 'F  4))
+      (measure
+        (quarter-note 'G 4)
+        (quarter-note 'F 4)
+        (quarter-note 'D 4)
+        (quarter-note 'B 3))
+      (measure
+        (whole-note 'C 4)))))
+]
+
+
+Just like @racket[struct-measure], a variardic constructor is provided to make 
+source files easier to read for musician programmers.
+
+@defproc[(instrument-line [instrument any/c] 
+                          [m measure?] ...) 
+                          instrument-line-struct?]
+Takes an @racket[instrument] and an arbitrary number of @racket[measure]s,
+
+@racketblock[
+(define line
+  (instrument-line-struct
+    (main-synth-instrument 34)
+    (measure
+      (quarter-note 'C  4)
+      (quarter-note 'D  4)
+      (quarter-note 'Eb 4)
+      (quarter-note 'F  4))
+    (measure
+      (quarter-note 'G 4)
+      (quarter-note 'F 4)
+      (quarter-note 'D 4)
+      (quarter-note 'B 3))
+    (measure
+      (whole-note 'C 4))))
+]
+
+@defproc[(play-instrument-line [instrument-line instrument-line?]
+                    [#:tempo tempo exact-positive-integer? 120]) 
+                    exact-positive-integer?]
+Plays a instrument-line.  If no @racket[#:tempo] keword is given, the default tempo is
+120 beats per minute.
+
+@racketblock[
+(define line
+  (instrument-line-struct
+    (main-synth-instrument 34)
+    (measure
+      (quarter-note 'C  4)
+      (quarter-note 'D  4)
+      (quarter-note 'Eb 4)
+      (quarter-note 'F  4))
+    (measure
+      (quarter-note 'G 4)
+      (quarter-note 'F 4)
+      (quarter-note 'D 4)
+      (quarter-note 'B 3))
+    (measure
+      (whole-note 'C 4))))
+(play-instrument-line line #:tempo 80)
+]
+
+@defproc[(instrument-line? [item any/c]) boolean?]
+Returns @racket[#t] if @racket[item] is an @racket[instrument-line].  
+Returns @racket[#f] otherwise.
+
+@defproc[(instr-line-instrument [instrument-line instrument-line?]) any/c]
+Returns @racket[instrument-line's] @racket[instrument].
+
+@defproc[(instr-line-measure-list [instrument-line instrument-line?]) (listof? measure?)]
+Returns a list of @racket[instrument-line's] @racket[measure]s.
+
+@defproc[(instr-line-is-valid? [instrument-line instrument-line?] 
+                               [time-signature time-signature?])
                                boolean?]
+Checks all of @racket[instrument-line's] @racket[measures] and returns 
+@racket[#t] if they are all valid given the @racket[time-signature].
 
 @section{Score Sections}
 
