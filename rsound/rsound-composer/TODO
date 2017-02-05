@@ -1,14 +1,15 @@
 Feature Wishlist
 
 Easy
--pickup measure
--make key-signature a keyword in <#procedure:section>
- instead of a label-function
+- pickup measure
+- make key-signature a keyword in <#procedure:section>
+   instead of a label-function
 - contracts for composer-rsound procedures
--make a module
--find more things to test
--scribble doc
--wav exporting
+- make a module
+- find more things to test
+- scribble doc
+- wav exporting
+- Powerful instrument creator
 
 Medium
 -note duration ties

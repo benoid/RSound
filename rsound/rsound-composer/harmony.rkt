@@ -3,12 +3,12 @@
 (require "note.rkt")
 (provide (all-defined-out))
 
-(struct struct-harmony [notes])
+(struct harmony-struct [notes])
 
 (define (harmony . notes)
-  (struct-harmony notes))
-(define harmony-notes struct-harmony-notes)
-(define harmony? struct-harmony?)
+  (harmony-struct notes))
+(define harmony-notes harmony-struct-notes)
+(define harmony? harmony-struct?)
 
 ;;;;;;;;;;;;;;; Basic Chord ;;;;;;;;;;;;
 
