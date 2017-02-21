@@ -134,6 +134,10 @@
 (define (double-dotted-eighth-note letter octave)
   (note letter octave double-dotted-eighth-beat))
 
+(define/contract (note-frames n tempo)
+  (-> note? exact-positive-integer? exact-nonnegative-integer?)
+  (inexact->exact (beat-value-frames ((note-duration n) tempo))))
+
 
 
 (define/contract (make-note-from-midi-num num duration)
@@ -154,7 +158,7 @@
     (note-octave n)))
 
 (define/contract (note-freq n)
-  (-> note? exact-nonnegative-integer?)
+  (-> note? positive?)
   (if (rest? n) 0               
     (letter-and-octave-to-freq 
       (note-letter n)

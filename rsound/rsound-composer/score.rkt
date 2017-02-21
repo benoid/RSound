@@ -141,8 +141,6 @@
           i)))))
 
 
-
-
 (struct measure-struct [notes]
   #:guard (lambda (notes name)
             (if (list? notes)
@@ -201,3 +199,5 @@
                (+ total (beat-value-frames ((note-duration n) tempo))))))
     0
     (measure-notes meas)))
+
+

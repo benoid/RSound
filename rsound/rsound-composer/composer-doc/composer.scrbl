@@ -666,6 +666,22 @@ Checks all of @racket[instrument-line]'s @racket[measures] and returns
 
 @section{Score Sections}
 
+Score Sections allow the ability to synchronize the playback of
+multiple Instrument Lines.
+
+@defstruct[time-signature ([beats-per-measure exact-positive-integer?] 
+                           [beat-denominator exact-positive-integer?])]{
+
+}
+
+@defstruct[section-struct ([time-sig time-signature?]
+                           [key-sig note?]
+                           [tempo exact-positive-integer?]
+                           [instrument-line-list (listof? instrument-line?)])]{
+
+}
+
+
 @section{Scores}
 
 @section{RSound Interop}

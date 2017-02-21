@@ -15,23 +15,34 @@
   #:guard (lambda (name proc t)
             (if (and (string? name)
                      (procedure? proc))
-                (values name (conversion-proc-safety-wrapper proc))
-                (error "expected args of type: <#string> <#procedure>"))))
+              (values name (conversion-proc-safety-wrapper proc))
+              (error "expected args of type: <#string> <#procedure>"))))
 
 
 ;; Needs test
 (define/contract (conversion-proc-safety-wrapper conversion-proc)
-  (-> procedure? procedure?)
-  (lambda (n tempo)
-    (cond ((rest? n) (silence (beat-value-frames 
-                                ((note-duration n) tempo))))
-          ((harmony? n) 
-           (rs-overlay*
-             (map (lambda (x)
-                    (conversion-proc x tempo))
-                  (harmony-notes n))))
-         (else 
-           (conversion-proc n tempo)))))
+                 (-> procedure? procedure?)
+                 (lambda (n tempo #:maybe-signal [maybe-signal #f])
+                   (let ([result
+                           (cond ((note? n) (conversion-proc n tempo))
+                                 (rest? n) (silence 
+                                             (beat-value-frames 
+                                               ((note-duration n) tempo)))
+                                 ((harmony? n) 
+                                  (rs-overlay*
+                                    (map (lambda (x)
+                                           (conversion-proc x tempo))
+                                         (harmony-notes n))))
+                                 ((rsound? n) n)
+                                 (else 
+                                   (conversion-proc n tempo)))])
+                     (cond [(rsound? result) result]
+                           [(signal? result)
+                            (if (not (maybe-signal)) 
+                              (signal->rsound (note-frames n tempo))
+                              result)]
+                           [else 
+                             (error "conversion procedure returned non rsound or signal")]))))
 
 ;; Needs test
 (define (vgame-synth-instrument spec)
