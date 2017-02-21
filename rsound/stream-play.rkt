@@ -12,13 +12,16 @@
 ;; of "sleep" to get your sequential sounds lined up correctly.
 
 (provide make-pstream
+         pstream?
          pstream-queue
          pstream-play
          pstream-current-frame
          pstream-queue-callback
          pstream-volume
          pstream-set-volume!
-         pstream-clear!)
+         pstream-clear!
+         pstream-queue-rslist
+         pstream-loop-rslist)
 
 ;; a pstream bundles a sound-heap that's attached
 ;; to a playing stream and a time-checker that returns
@@ -57,10 +60,10 @@
     (raise-argument-error 'pstream-queue "rsound" 1 pstream snd frame))
   (unless (= (pstream-frame-rate pstream) (rsound-sample-rate snd))
     (raise-argument-error 
-     'pstream-queue 
-     (format "rsound matching pstream's frame rate (~a)"
-             (pstream-frame-rate pstream))
-     1 pstream snd frame))
+      'pstream-queue 
+      (format "rsound matching pstream's frame rate (~a)"
+              (pstream-frame-rate pstream))
+      1 pstream snd frame))
   (unless (nonnegative-integer? frame)
     (raise-argument-error 'pstream-queue "exact nonnegative integer" 2 pstream snd frame))
   (define exact-frame (inexact->exact frame))
@@ -89,7 +92,7 @@
 ;; queue 'snd' for playing at the current frame
 (define (pstream-play pstream snd)
   (unless (pstream? pstream)
-    (raise-argument-error 'pstream-play "pstream" 0 pstream snd))
+    (raise-argument-error 'pstream-play"pstream" 0 pstream snd))
   (unless (rsound? snd)
     (raise-argument-error 'pstream-play "rsound" 1 pstream snd))
   (pstream-queue pstream snd (pstream-current-frame pstream))
@@ -110,4 +113,31 @@
   (set-box! (pstream-volume-box pstream) (exact->inexact volume))
   pstream)
 
+;; Sequentially queue a list of RSounds
+(define (pstream-queue-rslist pstr rs-list frames)
+  (define (local-queue local-list local-frames)
+    (cond [(not (null? local-list))
+           (pstream-queue pstr (car local-list) local-frames)      
+           (local-queue
+                                 (cdr local-list)
+                                 (+ local-frames
+                                    (rs-frames
+                                      (car local-list))))]
+          [else local-frames]))
+  (- (local-queue rs-list frames) frames))
 
+;; Continuously loop-queue a list of RSounds.
+(define (pstream-loop-rslist pstr
+                             rs-list
+                             frames
+                             #:callback-buffer [buffer 22050])
+  (let ([list-end-frame
+          (+ (pstream-queue-rslist pstr rs-list frames) frames)])
+    (pstream-queue-callback
+      pstr
+      (lambda ()
+        (pstream-loop-rslist pstr
+                             rs-list
+                             list-end-frame
+                             #:callback-buffer buffer))
+      (- list-end-frame buffer))))
