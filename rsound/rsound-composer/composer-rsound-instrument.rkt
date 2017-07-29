@@ -25,13 +25,14 @@
   (-> procedure? procedure?)
   (lambda (n tempo #:maybe-signal [maybe-signal #f])
     (let ([result
-            (cond ((non-rest-note? n) (conversion-proc n tempo))
-                  (rest? n) (silence 
+            (cond 
+                  ((rest? n) (silence 
                               (beat-value-frames 
-                                ((note-duration n) tempo)))
+                                ((note-duration n) tempo))))
                   ((harmony? n) 
                    (rs-overlay*
                      (map (lambda (x)
+                            (display "this-is-a-harmony\n")
                             (conversion-proc x tempo))
                           (harmony-notes n))))
                   ((rsound? n) n)

@@ -249,13 +249,13 @@
                         pstr
                         rs-list
                         (if (or (>= frames (pstream-current-frame pstr)) 
-                                (= lat 'off))
+                                (eq? lat 'off))
                           frames
                           (pstream-current-frame pstr))) 
                       (kill-thread (current-thread)))))
                 2d-rslist)])
+    (section-frames sect)
    ; (sleep-while (lambda () (andmap thread-running? thread-ids)) 0.005)
-   (void)
     ))
 
 
@@ -292,9 +292,10 @@
 
 
 (define (score->rsound-2dlist scr)
-  (map (lambda (sect)
+  (append* 
+    (map (lambda (sect)
          (section->rsound-2dlist sect))
-       (score-section-list scr)))
+       (score-section-list scr))))
 
 
 (define (pstream-queue-score/dynamic pstr scr frames)
