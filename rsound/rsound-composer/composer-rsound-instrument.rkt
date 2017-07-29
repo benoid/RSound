@@ -20,29 +20,30 @@
 
 
 ;; Needs test
-(define/contract (conversion-proc-safety-wrapper conversion-proc)
-                 (-> procedure? procedure?)
-                 (lambda (n tempo #:maybe-signal [maybe-signal #f])
-                   (let ([result
-                           (cond ((note? n) (conversion-proc n tempo))
-                                 (rest? n) (silence 
-                                             (beat-value-frames 
-                                               ((note-duration n) tempo)))
-                                 ((harmony? n) 
-                                  (rs-overlay*
-                                    (map (lambda (x)
-                                           (conversion-proc x tempo))
-                                         (harmony-notes n))))
-                                 ((rsound? n) n)
-                                 (else 
-                                   (conversion-proc n tempo)))])
-                     (cond [(rsound? result) result]
-                           [(signal? result)
-                            (if (not (maybe-signal)) 
-                              (signal->rsound (note-frames n tempo))
-                              result)]
-                           [else 
-                             (error "conversion procedure returned non rsound or signal")]))))
+(define/contract 
+  (conversion-proc-safety-wrapper conversion-proc)
+  (-> procedure? procedure?)
+  (lambda (n tempo #:maybe-signal [maybe-signal #f])
+    (let ([result
+            (cond ((non-rest-note? n) (conversion-proc n tempo))
+                  (rest? n) (silence 
+                              (beat-value-frames 
+                                ((note-duration n) tempo)))
+                  ((harmony? n) 
+                   (rs-overlay*
+                     (map (lambda (x)
+                            (conversion-proc x tempo))
+                          (harmony-notes n))))
+                  ((rsound? n) n)
+                  (else 
+                    (conversion-proc n tempo)))]) result)))
+;      (cond [(rsound? result) result]
+;            [(signal? result)
+;             (if (not (maybe-signal)) 
+;               (signal->rsound (note-frames n tempo))
+;               result)]
+;            [else 
+;              (error "conversion procedure returned non rsound or signal")]))))
 
 ;; Needs test
 (define (vgame-synth-instrument spec)
